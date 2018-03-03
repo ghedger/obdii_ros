@@ -6,7 +6,6 @@ This is a skeletal implementation of a node that will interface with the
 Advanced Navigation OBDII Automotive Odometer to publish messages via ROS.
 
 */
-
 #include <boost/thread/mutex.hpp>
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
@@ -22,6 +21,8 @@ class ObdiiNode
   ros::Publisher pub_;
   ros::Subscriber sub_;
 
+  int queue_size_;
+
   bool enable_;
   ros::Subscriber enable_sub_;
 public:
@@ -35,6 +36,9 @@ protected:
 ObdiiNode::ObdiiNode() :
   enable_(true)
 {
+  ros::param::get("~queue_size", queue_size_);
+  ROS_INFO("OBDII OUTPUT QUEUE SIZE: %d", queue_size_);
+
   pub_ = nh_.advertise<nav_msgs::Odometry>("obdii_packet", 2);
 
   ros::param::get("~enable", enable_);

@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="enable" default="true" />
-  <node name="obdii_interface_process" pkg="obdii_interface" type="obdii_interface_node" />
+  <arg name="output_queue_size" default="64" />
+  <node name="obdii_interface_process" pkg="obdii_interface" type="obdii_interface_node" output="screen">
+    <param name="queue_size" value="$(arg output_queue_size)" />
+  </node>
 </launch>
 
