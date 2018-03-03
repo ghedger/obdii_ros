@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="enable" default="true" />
+  <node name="obdii_interface_process" pkg="obdii_interface" type="obdii_interface_node" />
+</launch>
+
