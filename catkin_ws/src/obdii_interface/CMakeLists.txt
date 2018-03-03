@@ -139,7 +139,16 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/obdii_interface_node.cpp)
+add_executable(${PROJECT_NAME}_node
+  src/obdii_interface_node.cpp
+  src/rs232/rs232.c
+  src/rs232/rs232.h
+  src/an_packet_protocol.c
+  src/an_packet_protocol.h
+  src/obdii_odometer_packets.c
+  src/obdii_odometer_packets.h
+##  packet_example.c
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
