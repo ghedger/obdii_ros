@@ -1,0 +1,38 @@
+Advanced Navigation Packet Protocol OBDII Odometer SDK Version 1.0
+C Language SDK
+
+******************
+**** EXAMPLES ****
+******************
+
+Dynamic:
+	Uses dynamic memory allocation (malloc) and should be used in most cases.
+	The example code connects to OBDII Odometer through the serial port and decodes data in real time. Does not work on Mac systems.
+
+Static:
+	Does not use dynamic memory allocation and should be used on embedded systems that do not have dynamic memory allocation available.
+	The example code decodes a data dump from OBDII Odometer.
+
+*******************
+**** COMPILING ****
+*******************
+
+Windows:
+	1. Install MinGW
+	2. Open a command prompt
+	3. Navigate to the directory with the makefile
+	4. Type mingw32-make
+	5. Type packet_example.exe
+	
+Linux:
+	1. Open a terminal
+	2. Navigate to the directory with the makefile
+	3. Type make
+	4. Type ./packet_example
+	
+*******************
+**** CHANGELOG ****
+*******************
+
+v1.0:
+	First Release

@@ -1,0 +1,20 @@
+Advanced Navigation Packet Protocol SDK Version 1.0
+.Net Language SDK
+
+*******************
+**** COMPILING ****
+*******************
+
+This example is written in C# .NET and developed in Microsoft Visual Studio 2012.
+
+To develop with this example Microsoft Visual Studio Express 2012 is available for free from:
+http://www.microsoft.com/visualstudio/eng/products/visual-studio-express-for-windows-desktop#product-express-desktop-details
+
+To open the project File->Open Project and select ANPPExample.sln
+	
+*******************
+**** CHANGELOG ****
+*******************
+
+v1.0:
+	First Release
