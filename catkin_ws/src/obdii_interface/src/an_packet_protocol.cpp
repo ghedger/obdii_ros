@@ -62,7 +62,7 @@ uint8_t calculate_header_lrc(uint8_t *data)
  */
 an_packet_t *an_packet_allocate(uint8_t length, uint8_t id)
 {
-	an_packet_t *an_packet = malloc(sizeof(an_packet_t) + length * sizeof(uint8_t));
+	an_packet_t *an_packet = (an_packet_t *) malloc(sizeof(an_packet_t) + length * sizeof(uint8_t));
 	if (an_packet != NULL)
 	{
 		an_packet->id = id;

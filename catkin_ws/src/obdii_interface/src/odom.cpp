@@ -42,6 +42,15 @@
 #include "an_packet_protocol.h"
 #include "obdii_odometer_packets.h"
 
+/* GPH MODIFIED 20180302
+*/
+#if defined(DEBUG)
+#define ODOM_LOG ODOM_LOG
+#else
+#define ODOM_LOG
+#endif
+/* END GPH
+*/
 int an_packet_transmit(an_packet_t *an_packet)
 {
 	an_packet_encode(an_packet);
@@ -65,7 +74,7 @@ void request_device_information()
 	an_packet_free(&an_packet);
 }
 
-int main(int argc, char *argv[])
+void *odom_thread(void *pv)
 {
 	an_decoder_t an_decoder;
 	an_packet_t *an_packet;
@@ -74,19 +83,24 @@ int main(int argc, char *argv[])
 	
 	int bytes_received;
 
+  printf("%s:%d ODOM THREAD STARTING\n", __FILE__, __LINE__);
+
+// TODO: GPH Need to pass in the port from ROS param
+#if 0
 	if (argc != 2)
 	{
-		printf("Usage - program com_port\nExample - packet_example.exe COM1\n");
+		ODOM_LOG("Usage - program com_port\nExample - packet_example.exe COM1\n");
 		exit(EXIT_FAILURE);
 	}
 	
 	/* open the com port */
 	if (OpenComport(argv[1], 115200))
 	{
-		printf("Could not open serial port\n");
+		ODOM_LOG("Could not open serial port\n");
 		exit(EXIT_FAILURE);
 	}
-	
+#endif
+
 	an_decoder_initialise(&an_decoder);
 
 	while (1)
@@ -105,15 +119,14 @@ int main(int argc, char *argv[])
 					/* this allows easy access to all the different values             */
 					if(decode_odometer_packet(&odometer_packet, an_packet) == 0)
 					{
-						printf("Odometer Packet:\n");
-						printf("\tDelay = %f s, Speed = %f m/s, Distance = %f m, Reverse Detection = %d\n", odometer_packet.delay, odometer_packet.speed, odometer_packet.distance_travelled, odometer_packet.flags.b.reverse_detection_supported);
+						ODOM_LOG("Odometer Packet:\n");
+						ODOM_LOG("\tDelay = %f s, Speed = %f m/s, Distance = %f m, Reverse Detection = %d\n", odometer_packet.delay, odometer_packet.speed, odometer_packet.distance_travelled, odometer_packet.flags.b.reverse_detection_supported);
 					}
 				}
 				else
 				{
-					printf("Packet ID %u of Length %u\n", an_packet->id, an_packet->length);
+					ODOM_LOG("Packet ID %u of Length %u\n", an_packet->id, an_packet->length);
 				}
-				
 				/* Ensure that you free the an_packet when your done with it or you will leak memory */
 				an_packet_free(&an_packet);
 			}
@@ -124,4 +137,5 @@ int main(int argc, char *argv[])
     usleep(10000);
 #endif
 	}
+  return NULL;
 }

@@ -6,11 +6,13 @@ This is a skeletal implementation of a node that will interface with the
 Advanced Navigation OBDII Automotive Odometer to publish messages via ROS.
 
 */
+
 #include <boost/thread/mutex.hpp>
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Bool.h>
 #include <nav_msgs/Odometry.h>   // Placeholder
+#include <pthread.h>
 
 // ObdiiNode
 // ROS Node to interface to OBDII device and
@@ -54,11 +56,21 @@ void ObdiiNode::enableCallback(const std_msgs::BoolConstPtr& msg)
   enable_ = msg->data;
 }
 
+// TODO: MOVE THIS
+void *odom_thread(void *pv);
+
 // Main entry point
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "obdii_node");
   ObdiiNode* obdiiNode = new ObdiiNode();
+
+  pthread_t worker;
+  int ret = pthread_create(&worker, NULL, &odom_thread, ( void * ) NULL);
+  if(ret) {
+    ROS_ERROR( "%s Unable to start worker thread", __FILE__ );
+    return -1;
+  }
 
   ros::spin();
 }
