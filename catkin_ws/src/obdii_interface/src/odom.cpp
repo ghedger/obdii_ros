@@ -42,13 +42,20 @@
 #include "an_packet_protocol.h"
 #include "obdii_odometer_packets.h"
 
+#include "odom.h"
+
 /* GPH MODIFIED 20180302
 */
+#if !defined(DEBUG)
+#define DEBUG 1
+#endif
 #if defined(DEBUG)
-#define ODOM_LOG ODOM_LOG
+#define ODOM_LOG printf
 #else
 #define ODOM_LOG
 #endif
+#define ODOM_ERROR printf
+
 /* END GPH
 */
 int an_packet_transmit(an_packet_t *an_packet)
@@ -78,28 +85,34 @@ void *odom_thread(void *pv)
 {
 	an_decoder_t an_decoder;
 	an_packet_t *an_packet;
-	
 	odometer_packet_t odometer_packet;
-	
+
 	int bytes_received;
 
-  printf("%s:%d ODOM THREAD STARTING\n", __FILE__, __LINE__);
+  const WorkerParams *pWorkerParams = ( const WorkerParams * ) pv;
 
-// TODO: GPH Need to pass in the port from ROS param
-#if 0
-	if (argc != 2)
-	{
-		ODOM_LOG("Usage - program com_port\nExample - packet_example.exe COM1\n");
-		exit(EXIT_FAILURE);
-	}
-	
+  ODOM_LOG("ODOM WORKER THREAD STARTING\n");
+
 	/* open the com port */
-	if (OpenComport(argv[1], 115200))
+  char szPort[MAX_PORT_STR_SIZE];
+  strncpy(szPort, pWorkerParams->port_.c_str(), sizeof(szPort));
+
+  ODOM_LOG(
+    "ODOM WORKER THREAD: Attempting to open port %s at %d baud.\n",
+    szPort,
+    pWorkerParams->baud_rate_
+  );
+
+	if (OpenComport( szPort, pWorkerParams->baud_rate_ ))
 	{
-		ODOM_LOG("Could not open serial port\n");
-		exit(EXIT_FAILURE);
+		ODOM_ERROR("Could not open serial port %s at %d baud.\n",
+      szPort,
+      pWorkerParams->baud_rate_
+    );
+    ODOM_ERROR("ODOM WORKER EXITING...\n");
+    return NULL;
+		//exit(EXIT_FAILURE);
 	}
-#endif
 
 	an_decoder_initialise(&an_decoder);
 
@@ -109,7 +122,7 @@ void *odom_thread(void *pv)
 		{
 			/* increment the decode buffer length by the number of bytes received */
 			an_decoder_increment(&an_decoder, bytes_received);
-			
+
 			/* decode all the packets in the buffer */
 			while ((an_packet = an_packet_decode(&an_decoder)) != NULL)
 			{

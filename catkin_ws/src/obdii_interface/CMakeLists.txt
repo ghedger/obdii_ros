@@ -145,7 +145,6 @@ add_executable(${PROJECT_NAME}_node
   src/an_packet_protocol.cpp
   src/obdii_odometer_packets.cpp
   src/odom.cpp
-  src/dummy.cpp
 )
 
 ## Rename C++ executable without prefix
