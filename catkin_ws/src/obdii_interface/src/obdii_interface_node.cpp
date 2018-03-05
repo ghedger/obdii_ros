@@ -31,7 +31,7 @@ class ObdiiNode
   ros::Subscriber enable_sub_;
 public:
   ObdiiNode();
-  
+
   // Getters/Setters
   const WorkerParams *getWorkerParams() { return &workerParams_; }
   void setWorkerParams(const int baudRate, const int port) {
@@ -59,7 +59,10 @@ ObdiiNode::ObdiiNode() :
   ros::param::get("~obdii_polling_rate", workerParams_.polling_rate_);
   ROS_INFO("OBDII RS232 POLLING RATE (Hz): %d", workerParams_.polling_rate_);
 
+  workerParams_.nh_ = nh_;
+
   pub_ = nh_.advertise<nav_msgs::Odometry>("obdii_packet", 2);
+  workerParams_.pub_ = pub_;
 
   ros::param::get("~enable", enable_);
   enable_sub_ = nh_.subscribe("enable", 1, &ObdiiNode::enableCallback, this);
@@ -74,8 +77,6 @@ void ObdiiNode::enableCallback(const std_msgs::BoolConstPtr& msg)
   enable_ = msg->data;
 }
 
-// TODO: MOVE THIS
-void *odom_thread(void *pv);
 
 // Main entry point
 int main(int argc, char** argv)

@@ -38,14 +38,20 @@
 #include <unistd.h>
 #endif
 
+#include <ros/ros.h>
+#include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Bool.h>
+#include <nav_msgs/Odometry.h>
+
+
 #include "rs232/rs232.h"
 #include "an_packet_protocol.h"
 #include "obdii_odometer_packets.h"
-
 #include "odom.h"
 
 /* GPH MODIFIED 20180302
 */
+#define ODOM_TEST
 #if !defined(DEBUG)
 #define DEBUG 1
 #endif
@@ -83,13 +89,30 @@ void request_device_information()
 
 // odom_calc_polling_rate
 //
-// Calculates the delay in microseconds from the target rate in Hertz
+// Calculates the delay in microseconds from the target rate in Hertz.
 //
 // Entry: Target rate in Hz
 // Exit:  Between-time in microseconds
-int odom_calc_polling_rate( int perSecond )
+int odom_calc_polling_rate(int perSecond)
 {
   return ( 100000000 / perSecond ) / 100;
+}
+
+// odom_update
+//
+// Updates the odometry reading and prepares the ROS message for publication.
+//
+// Entry: pointer to ROS message structure
+//        double delay
+//        double speed
+//        double distance
+//        int flags          
+// Exit:  -
+int odom_update(nav_msgs::Odometry *odomMsg, double delay, double speed, double distance, bool flags)
+{
+  odomMsg->header.stamp = ros::Time::now();
+  odomMsg->header.frame_id = "odom";
+  odomMsg->pose.pose.position.x = distance;
 }
 
 void *odom_thread(void *pv)
@@ -97,6 +120,13 @@ void *odom_thread(void *pv)
 	an_decoder_t an_decoder;
 	an_packet_t *an_packet;
 	odometer_packet_t odometer_packet;
+
+#if defined(ODOM_TEST)
+  double  testDelay = 0.0;
+  double  testSpeed = 0.0;
+  double  testDistance = 0.0;
+#endif
+
 
 	int bytes_received;
 
@@ -110,6 +140,10 @@ void *odom_thread(void *pv)
     polling_rate / 1000,
     (double) (1000000.0 / polling_rate)
   );
+
+  /* set up ROS publisher */
+  ros::Publisher pub = pWorkerParams->pub_;
+  nav_msgs::Odometry odomMsg;
 
 	/* open the com port */
   char szPort[MAX_PORT_STR_SIZE];
@@ -152,6 +186,16 @@ void *odom_thread(void *pv)
 					{
 						ODOM_LOG("Odometer Packet:\n");
 						ODOM_LOG("\tDelay = %f s, Speed = %f m/s, Distance = %f m, Reverse Detection = %d\n", odometer_packet.delay, odometer_packet.speed, odometer_packet.distance_travelled, odometer_packet.flags.b.reverse_detection_supported);
+
+            /* GPH Added: Prepare odometry packet for publication
+            */
+            odom_update(
+              &odomMsg,
+              odometer_packet.delay,
+              odometer_packet.speed,
+              odometer_packet.distance_travelled,
+              odometer_packet.flags.b.reverse_detection_supported
+            );
 					}
 				}
 				else
@@ -162,10 +206,30 @@ void *odom_thread(void *pv)
 				an_packet_free(&an_packet);
 			}
 		}
+
+#if defined(ODOM_TEST)
+    odom_update(
+      &odomMsg,
+      testDelay,
+      testSpeed,
+      testDistance,
+      false
+    );
+
+    testDistance += 0.1;
+    testDelay = 0.1;
+    testSpeed = 25.0;
+#endif
+
+
 #ifdef _WIN32
     Sleep( polling_rate / 1000);
 #else
+
+    pub.publish(odomMsg);
+
     ODOM_LOG("ODOM WORKER THREAD: Polling...\n");
+
     usleep( polling_rate );
 #endif
 	}
