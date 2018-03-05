@@ -66,8 +66,8 @@
 */
 int an_packet_transmit(an_packet_t *an_packet)
 {
-	an_packet_encode(an_packet);
-	return SendBuf(an_packet_pointer(an_packet), an_packet_size(an_packet));
+  an_packet_encode(an_packet);
+  return SendBuf(an_packet_pointer(an_packet), an_packet_size(an_packet));
 }
 
 /*
@@ -81,10 +81,10 @@ int an_packet_transmit(an_packet_t *an_packet)
  */
 void request_device_information()
 {
-	an_packet_t *an_packet = an_packet_allocate(1, packet_id_request);
-	an_packet->data[0] = packet_id_device_information;
-	an_packet_transmit(an_packet);
-	an_packet_free(&an_packet);
+  an_packet_t *an_packet = an_packet_allocate(1, packet_id_request);
+  an_packet->data[0] = packet_id_device_information;
+  an_packet_transmit(an_packet);
+  an_packet_free(&an_packet);
 }
 
 // odom_calc_polling_rate
@@ -117,9 +117,9 @@ int odom_update(nav_msgs::Odometry *odomMsg, double delay, double speed, double 
 
 void *odom_thread(void *pv)
 {
-	an_decoder_t an_decoder;
-	an_packet_t *an_packet;
-	odometer_packet_t odometer_packet;
+  an_decoder_t an_decoder;
+  an_packet_t *an_packet;
+  odometer_packet_t odometer_packet;
 
 #if defined(ODOM_TEST)
   double  testDelay = 0.0;
@@ -128,7 +128,7 @@ void *odom_thread(void *pv)
 #endif
 
 
-	int bytes_received;
+  int bytes_received;
 
   const WorkerParams *pWorkerParams = (const WorkerParams *) pv;
 
@@ -145,7 +145,7 @@ void *odom_thread(void *pv)
   ros::Publisher pub = pWorkerParams->pub_;
   nav_msgs::Odometry odomMsg;
 
-	/* open the com port */
+  /* open the com port */
   char szPort[MAX_PORT_STR_SIZE];
   strncpy(szPort, pWorkerParams->port_.c_str(), sizeof(szPort));
 
@@ -155,37 +155,37 @@ void *odom_thread(void *pv)
     pWorkerParams->baud_rate_
   );
 
-	if (OpenComport( szPort, pWorkerParams->baud_rate_ ))
-	{
-		ODOM_ERROR("Could not open serial port %s at %d baud.\n",
+  if (OpenComport( szPort, pWorkerParams->baud_rate_ ))
+  {
+    ODOM_ERROR("Could not open serial port %s at %d baud.\n",
       szPort,
       pWorkerParams->baud_rate_
     );
     ODOM_ERROR("ODOM WORKER THREAD"": EXITING...\n");
     //return NULL;
-		//exit(EXIT_FAILURE);
-	}
+    //exit(EXIT_FAILURE);
+  }
 
-	an_decoder_initialise(&an_decoder);
+  an_decoder_initialise(&an_decoder);
 
-	while (1)
-	{
-		if ((bytes_received = PollComport(an_decoder_pointer(&an_decoder), an_decoder_size(&an_decoder))) > 0)
-		{
-			/* increment the decode buffer length by the number of bytes received */
-			an_decoder_increment(&an_decoder, bytes_received);
+  while (1)
+  {
+    if ((bytes_received = PollComport(an_decoder_pointer(&an_decoder), an_decoder_size(&an_decoder))) > 0)
+    {
+      /* increment the decode buffer length by the number of bytes received */
+      an_decoder_increment(&an_decoder, bytes_received);
 
-			/* decode all the packets in the buffer */
-			while ((an_packet = an_packet_decode(&an_decoder)) != NULL)
-			{
-				if (an_packet->id == packet_id_odometer) /* odometer packet */
-				{
-					/* copy all the binary data into the typedef struct for the packet */
-					/* this allows easy access to all the different values             */
-					if(decode_odometer_packet(&odometer_packet, an_packet) == 0)
-					{
-						ODOM_LOG("Odometer Packet:\n");
-						ODOM_LOG("\tDelay = %f s, Speed = %f m/s, Distance = %f m, Reverse Detection = %d\n", odometer_packet.delay, odometer_packet.speed, odometer_packet.distance_travelled, odometer_packet.flags.b.reverse_detection_supported);
+      /* decode all the packets in the buffer */
+      while ((an_packet = an_packet_decode(&an_decoder)) != NULL)
+      {
+        if (an_packet->id == packet_id_odometer) /* odometer packet */
+        {
+          /* copy all the binary data into the typedef struct for the packet */
+          /* this allows easy access to all the different values             */
+          if(decode_odometer_packet(&odometer_packet, an_packet) == 0)
+          {
+            ODOM_LOG("Odometer Packet:\n");
+            ODOM_LOG("\tDelay = %f s, Speed = %f m/s, Distance = %f m, Reverse Detection = %d\n", odometer_packet.delay, odometer_packet.speed, odometer_packet.distance_travelled, odometer_packet.flags.b.reverse_detection_supported);
 
             /* GPH Added: Prepare odometry packet for publication
             */
@@ -196,16 +196,16 @@ void *odom_thread(void *pv)
               odometer_packet.distance_travelled,
               odometer_packet.flags.b.reverse_detection_supported
             );
-					}
-				}
-				else
-				{
-					ODOM_LOG("Packet ID %u of Length %u\n", an_packet->id, an_packet->length);
-				}
-				/* Ensure that you free the an_packet when your done with it or you will leak memory */
-				an_packet_free(&an_packet);
-			}
-		}
+          }
+        }
+        else
+        {
+          ODOM_LOG("Packet ID %u of Length %u\n", an_packet->id, an_packet->length);
+        }
+        /* Ensure that you free the an_packet when your done with it or you will leak memory */
+        an_packet_free(&an_packet);
+      }
+    }
 
 #if defined(ODOM_TEST)
     odom_update(
@@ -232,6 +232,6 @@ void *odom_thread(void *pv)
 
     usleep( polling_rate );
 #endif
-	}
+  }
   return NULL;
 }
