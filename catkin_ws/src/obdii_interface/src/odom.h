@@ -18,6 +18,7 @@ const int MAX_PORT_STR_SIZE = 32;
 struct WorkerParams {
   int baud_rate_;
   std::string port_;
+  int polling_rate_;
 };
 
 

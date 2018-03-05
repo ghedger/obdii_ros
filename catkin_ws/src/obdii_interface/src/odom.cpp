@@ -81,6 +81,17 @@ void request_device_information()
 	an_packet_free(&an_packet);
 }
 
+// odom_calc_polling_rate
+//
+// Calculates the delay in microseconds from the target rate in Hertz
+//
+// Entry: Target rate in Hz
+// Exit:  Between-time in microseconds
+int odom_calc_polling_rate( int perSecond )
+{
+  return ( 100000000 / perSecond ) / 100;
+}
+
 void *odom_thread(void *pv)
 {
 	an_decoder_t an_decoder;
@@ -89,9 +100,16 @@ void *odom_thread(void *pv)
 
 	int bytes_received;
 
-  const WorkerParams *pWorkerParams = ( const WorkerParams * ) pv;
+  const WorkerParams *pWorkerParams = (const WorkerParams *) pv;
 
-  ODOM_LOG("ODOM WORKER THREAD STARTING\n");
+  ODOM_LOG("ODOM WORKER THREAD: STARTING\n");
+  /* Calculate sleep time from Hz */
+  const int polling_rate = odom_calc_polling_rate(pWorkerParams->polling_rate_);
+  ODOM_LOG(
+    "ODOM WORKER THREAD: Polling every %dms, %4.2fHz\n",
+    polling_rate / 1000,
+    (double) (1000000.0 / polling_rate)
+  );
 
 	/* open the com port */
   char szPort[MAX_PORT_STR_SIZE];
@@ -109,8 +127,8 @@ void *odom_thread(void *pv)
       szPort,
       pWorkerParams->baud_rate_
     );
-    ODOM_ERROR("ODOM WORKER EXITING...\n");
-    return NULL;
+    ODOM_ERROR("ODOM WORKER THREAD"": EXITING...\n");
+    //return NULL;
 		//exit(EXIT_FAILURE);
 	}
 
@@ -145,9 +163,10 @@ void *odom_thread(void *pv)
 			}
 		}
 #ifdef _WIN32
-    Sleep(10);
+    Sleep( polling_rate / 1000);
 #else
-    usleep(10000);
+    ODOM_LOG("ODOM WORKER THREAD: Polling...\n");
+    usleep( polling_rate );
 #endif
 	}
   return NULL;

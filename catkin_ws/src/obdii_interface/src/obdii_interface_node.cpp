@@ -56,6 +56,9 @@ ObdiiNode::ObdiiNode() :
   ros::param::get("~rs232_baud_rate", workerParams_.baud_rate_);
   ROS_INFO("OBDII RS232 BAUD RATE: %d", workerParams_.baud_rate_);
 
+  ros::param::get("~obdii_polling_rate", workerParams_.polling_rate_);
+  ROS_INFO("OBDII RS232 POLLING RATE (Hz): %d", workerParams_.polling_rate_);
+
   pub_ = nh_.advertise<nav_msgs::Odometry>("obdii_packet", 2);
 
   ros::param::get("~enable", enable_);
