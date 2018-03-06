@@ -51,9 +51,10 @@
 
 /* Preprocessor 
 */
-#define ODOM_TEST
+// Uncomment this to publish fake data
+//#define ODOM_TEST
 #if !defined(DEBUG)
-#define DEBUG 1
+//#define DEBUG 1
 #endif
 #if defined(DEBUG)
 #define ODOM_LOG printf
@@ -128,7 +129,6 @@ void *odom_thread(void *pv)
   double  testDistance = 0.0;
 #endif
 
-
   int bytes_received;
 
   const WorkerParams *pWorkerParams = (const WorkerParams *) pv;
@@ -163,7 +163,7 @@ void *odom_thread(void *pv)
       pWorkerParams->baud_rate_
     );
     ODOM_ERROR("ODOM WORKER THREAD"": EXITING...\n");
-    //return NULL;
+    return NULL;
     //exit(EXIT_FAILURE);
   }
 
@@ -227,7 +227,6 @@ void *odom_thread(void *pv)
 #else
 
     pub.publish(odomMsg);
-
     ODOM_LOG("ODOM WORKER THREAD: Polling...\n");
 
     usleep( polling_rate );
