@@ -6,7 +6,7 @@
   <arg name="rs232_baud_rate" default="115200" />
   <arg name="rs232_port" default="COM1" />
   <arg name="obdii_polling_rate" default="100" />
-  <arg name="pub_topic" default="/obdii_packettest" />
+  <arg name="pub_topic" default="/obdii_packet" />
   <node name="obdii_interface_process" pkg="obdii_interface" type="obdii_interface_node" output="screen">
     <param name="queue_size" value="$(arg output_queue_size)" />
     <param name="rs232_baud_rate" value="$(arg rs232_baud_rate)" />
