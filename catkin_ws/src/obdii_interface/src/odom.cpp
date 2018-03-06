@@ -52,9 +52,9 @@
 /* Preprocessor 
 */
 // Uncomment this to publish fake data
-//#define ODOM_TEST
+#define ODOM_TEST
 #if !defined(DEBUG)
-//#define DEBUG 1
+#define DEBUG 1
 #endif
 #if defined(DEBUG)
 #define ODOM_LOG printf
@@ -163,7 +163,9 @@ void *odom_thread(void *pv)
       pWorkerParams->baud_rate_
     );
     ODOM_ERROR("ODOM WORKER THREAD"": EXITING...\n");
+#if !defined(DEBUG)
     return NULL;
+#endif
     //exit(EXIT_FAILURE);
   }
 

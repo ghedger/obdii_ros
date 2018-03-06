@@ -29,9 +29,12 @@ class ObdiiNode
   ros::Subscriber sub_;
   int queue_size_;
   bool enable_;
+  ros::Subscriber enable_sub_;
+  std::string pub_topic_;
+
+
   WorkerParams  workerParams_;
 
-  ros::Subscriber enable_sub_;
 public:
   ObdiiNode();
 
@@ -62,9 +65,12 @@ ObdiiNode::ObdiiNode() :
   ros::param::get("~obdii_polling_rate", workerParams_.polling_rate_);
   ROS_INFO("OBDII RS232 POLLING RATE (Hz): %d", workerParams_.polling_rate_);
 
+  ros::param::get("~pub_topic", pub_topic_);
+  ROS_INFO("PUBLICATION TOPIC: %s", pub_topic_.c_str());
+
   workerParams_.nh_ = nh_;
 
-  pub_ = nh_.advertise<obdii_interface::ObdiiState>("obdii_packet", 2);
+  pub_ = nh_.advertise<obdii_interface::ObdiiState>(pub_topic_, 2);
   workerParams_.pub_ = pub_;
 
   ros::param::get("~enable", enable_);
