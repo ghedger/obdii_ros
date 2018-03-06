@@ -42,14 +42,14 @@
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Bool.h>
 #include <nav_msgs/Odometry.h>
-
+#include "obdii_interface/ObdiiState.h"
 
 #include "rs232/rs232.h"
 #include "an_packet_protocol.h"
 #include "obdii_odometer_packets.h"
 #include "odom.h"
 
-/* GPH MODIFIED 20180302
+/* Preprocessor 
 */
 #define ODOM_TEST
 #if !defined(DEBUG)
@@ -62,8 +62,6 @@
 #endif
 #define ODOM_ERROR printf
 
-/* END GPH
-*/
 int an_packet_transmit(an_packet_t *an_packet)
 {
   an_packet_encode(an_packet);
@@ -108,11 +106,14 @@ int odom_calc_polling_rate(int perSecond)
 //        double distance
 //        int flags          
 // Exit:  -
-int odom_update(nav_msgs::Odometry *odomMsg, double delay, double speed, double distance, bool flags)
+int odom_update(obdii_interface::ObdiiState* odomMsg, double delay, double speed, double distance, bool flags)
 {
   odomMsg->header.stamp = ros::Time::now();
   odomMsg->header.frame_id = "odom";
-  odomMsg->pose.pose.position.x = distance;
+  odomMsg->delay = delay;
+  odomMsg->speed = speed;
+  odomMsg->distance = distance;
+  odomMsg->flags = (flags ? 1 : 0);
 }
 
 void *odom_thread(void *pv)
@@ -143,7 +144,7 @@ void *odom_thread(void *pv)
 
   /* set up ROS publisher */
   ros::Publisher pub = pWorkerParams->pub_;
-  nav_msgs::Odometry odomMsg;
+  obdii_interface::ObdiiState odomMsg;
 
   /* open the com port */
   char szPort[MAX_PORT_STR_SIZE];
@@ -220,7 +221,6 @@ void *odom_thread(void *pv)
     testDelay = 0.1;
     testSpeed = 25.0;
 #endif
-
 
 #ifdef _WIN32
     Sleep( polling_rate / 1000);

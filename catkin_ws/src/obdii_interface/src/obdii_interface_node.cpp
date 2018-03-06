@@ -9,11 +9,14 @@ Advanced Navigation OBDII Automotive Odometer to publish messages via ROS.
 */
 
 #include <boost/thread/mutex.hpp>
+#include <pthread.h>
+
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Bool.h>
 #include <nav_msgs/Odometry.h>
-#include <pthread.h>
+#include "obdii_interface/ObdiiState.h"
+
 #include "odom.h"
 
 // ObdiiNode
@@ -61,7 +64,7 @@ ObdiiNode::ObdiiNode() :
 
   workerParams_.nh_ = nh_;
 
-  pub_ = nh_.advertise<nav_msgs::Odometry>("obdii_packet", 2);
+  pub_ = nh_.advertise<obdii_interface::ObdiiState>("obdii_packet", 2);
   workerParams_.pub_ = pub_;
 
   ros::param::get("~enable", enable_);
