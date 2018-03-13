@@ -1,0 +1,8 @@
+NOTES 20180313
+sudo gpasswd --add ghedger dialout
+
+Working launch command with OBDII connected directly to laptop:
+roslaunch obdii_interface obdii_interface.launch rs232_baud_rate:="115200" rs232_port:="/dev/ttyUSB0" obdii_polling_rate:="1"
+
+
+

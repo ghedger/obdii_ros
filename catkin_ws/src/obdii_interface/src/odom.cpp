@@ -52,9 +52,9 @@
 /* Preprocessor 
 */
 // Uncomment this to publish fake data
-#define ODOM_TEST
+//#define ODOM_TEST
 #if !defined(DEBUG)
-#define DEBUG 1
+//#define DEBUG 1
 #endif
 #if defined(DEBUG)
 #define ODOM_LOG printf
