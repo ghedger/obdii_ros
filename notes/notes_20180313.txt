@@ -4,5 +4,17 @@ sudo gpasswd --add ghedger dialout
 Working launch command with OBDII connected directly to laptop:
 roslaunch obdii_interface obdii_interface.launch rs232_baud_rate:="115200" rs232_port:="/dev/ttyUSB0" obdii_polling_rate:="1"
 
+launch file would not launch from ODRDOID; running
+catkin_make install
+
+Still no launch; added these lines to ~/.bashrc
+
+export ROS_IP='127.0.0.1'
+export ROS_HOSTNAME=$ROS_IP
+export ROS_MASTER_URI=http://$ROS_IP:11311
+source /opt/ros/kinetic/setup.bash
+source ~/catkin_ws/devel/setup.bash
+
+
 
 
